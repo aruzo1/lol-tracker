@@ -1,0 +1,3 @@
+https://eun1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/VSVOulGxOS_3Bzu4CIMUCTubVAklvtRstuftzfDugFp0KmAsbwY6O6ZIO72JQRFUXsDMxIxB2Q4YeA?api_key=RGAPI-c42b7d58-d1ba-4e88-83c8-e414747db842
+https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/kulaaa%20szef/euw?api_key=RGAPI-c42b7d58-d1ba-4e88-83c8-e414747db842
+
