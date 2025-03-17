@@ -4,6 +4,9 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
+import { SummonerProfile } from "./summoner-profile";
+import { SUMMONERS } from "@/features/summoners/constants";
+import { ACCOUNTS } from "@/features/accounts/constants";
 
 function getHashCount(value: string) {
   return (value.match(/#/g) || []).length;
@@ -88,11 +91,27 @@ export function SummonerSearch() {
         </PopoverAnchor>
 
         <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] h-16"
+          className="w-[var(--radix-popover-trigger-width)]"
           onOpenAutoFocus={(e) => e.preventDefault()}
           sideOffset={8}
         >
-          xxx
+          {ACCOUNTS.map((account) => {
+            const summoner = SUMMONERS.find(
+              (summoner) => summoner.puuid === account.puuid
+            );
+
+            if (!summoner) {
+              return null;
+            }
+
+            return (
+              <SummonerProfile
+                key={account.puuid}
+                account={account}
+                summoner={summoner}
+              />
+            );
+          })}
         </PopoverContent>
       </Popover>
     </div>
