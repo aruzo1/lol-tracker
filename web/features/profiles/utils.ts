@@ -1,11 +1,12 @@
-import { Profile } from "./types";
+import { ProfileSuggestion } from "./types";
 
-export async function getProfilesSuggestions(search: string) {
-  const searchNormalized = search.replace("#", "_");
+export async function getProfilesSuggestions(name: string) {
+  const nameNormalized = name.replace("#", "_");
 
   const res = await fetch(
-    `/api/profiles/suggestions?search=${searchNormalized}`
+    process.env.NEXT_PUBLIC_API_URL +
+      `/profiles/search?name=${nameNormalized}`
   );
 
-  return (await res.json()) as Profile[];
+  return (await res.json()) as ProfileSuggestion[];
 }

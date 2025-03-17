@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
 import { SummonerProfile } from "./summoner-profile";
-import { Profile } from "@/features/profiles/types";
+import { ProfileSuggestion } from "@/features/profiles/types";
 import { getProfilesSuggestions } from "@/features/profiles/utils";
 
 function getHashCount(value: string) {
@@ -15,7 +15,7 @@ function getHashCount(value: string) {
 export function SummonerSearch() {
   const [showResults, setShowResults] = React.useState(true);
   const [search, setSearch] = React.useState("");
-  const [suggestions, setSuggestions] = React.useState<Profile[]>([]);
+  const [suggestions, setSuggestions] = React.useState<ProfileSuggestion[]>([]);
 
   const includesHash = React.useMemo(() => search.includes("#"), [search]);
   const showHint = React.useMemo(
@@ -65,7 +65,7 @@ export function SummonerSearch() {
     if (search.trim() === "") {
       return;
     }
-    console.log(search)
+    console.log(search);
     const timeOutId = setTimeout(
       () => getProfilesSuggestions(search).then(setSuggestions),
       500
@@ -109,8 +109,11 @@ export function SummonerSearch() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           sideOffset={8}
         >
-          {suggestions.map((profile) => (
-            <SummonerProfile key={profile.puuid} {...profile} />
+          {suggestions.map((profileSuggestion) => (
+            <SummonerProfile
+              key={profileSuggestion.account.puuid}
+              {...profileSuggestion}
+            />
           ))}
         </PopoverContent>
       </Popover>
