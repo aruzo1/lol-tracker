@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
 import { SummonerProfile } from "./summoner-profile";
-import { SUMMONERS } from "@/features/summoners/constants";
-import { ACCOUNTS } from "@/features/accounts/constants";
+import { Profile } from "@/features/profiles/types";
+import { getProfilesSuggestions } from "@/features/profiles/utils";
 
 function getHashCount(value: string) {
   return (value.match(/#/g) || []).length;
@@ -15,6 +15,8 @@ function getHashCount(value: string) {
 export function SummonerSearch() {
   const [showResults, setShowResults] = React.useState(true);
   const [search, setSearch] = React.useState("");
+  const [suggestions, setSuggestions] = React.useState<Profile[]>([]);
+
   const includesHash = React.useMemo(() => search.includes("#"), [search]);
   const showHint = React.useMemo(
     () => search.length > 0 && !includesHash,
@@ -22,11 +24,10 @@ export function SummonerSearch() {
   );
 
   const addHash = React.useCallback((value: string) => {
-    console.log(value.trim());
     setSearch(value.trim().replace("#", "") + " #");
   }, []);
 
-  const onSearchChange = React.useCallback(
+  const handleSearchChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
 
@@ -51,7 +52,7 @@ export function SummonerSearch() {
     [addHash, search, includesHash]
   );
 
-  const onSearchKeyDown = React.useCallback(
+  const handleSearchKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "ArrowRight" && getHashCount(search) === 0) {
         addHash(search);
@@ -59,6 +60,19 @@ export function SummonerSearch() {
     },
     [search, addHash]
   );
+
+  React.useEffect(() => {
+    if (search.trim() === "") {
+      return;
+    }
+    console.log(search)
+    const timeOutId = setTimeout(
+      () => getProfilesSuggestions(search).then(setSuggestions),
+      500
+    );
+
+    return () => clearTimeout(timeOutId);
+  }, [search]);
 
   return (
     <div className="mt-6 w-lg">
@@ -76,8 +90,8 @@ export function SummonerSearch() {
                 className="w-full outline-none ml-2"
                 placeholder="Game name + #tagline"
                 value={search}
-                onChange={onSearchChange}
-                onKeyDown={onSearchKeyDown}
+                onChange={handleSearchChange}
+                onKeyDown={handleSearchKeyDown}
                 autoComplete="off"
               />
               <div className="absolute flex items-center h-full top-0 ml-8 -z-10">
@@ -95,23 +109,9 @@ export function SummonerSearch() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           sideOffset={8}
         >
-          {ACCOUNTS.map((account) => {
-            const summoner = SUMMONERS.find(
-              (summoner) => summoner.puuid === account.puuid
-            );
-
-            if (!summoner) {
-              return null;
-            }
-
-            return (
-              <SummonerProfile
-                key={account.puuid}
-                account={account}
-                summoner={summoner}
-              />
-            );
-          })}
+          {suggestions.map((profile) => (
+            <SummonerProfile key={profile.puuid} {...profile} />
+          ))}
         </PopoverContent>
       </Popover>
     </div>

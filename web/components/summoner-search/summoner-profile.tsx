@@ -1,38 +1,32 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Account } from "@/features/accounts/types";
-import { Summoner } from "@/features/summoners/types";
 import { getSummonerProfileIconUrl } from "@/features/summoners/urls";
+import { Profile } from "@/features/profiles/types";
 
-type SummonerProfileProps = {
-  account: Account;
-  summoner: Summoner;
-};
-
-export function SummonerProfile({ account, summoner }: SummonerProfileProps) {
+export function SummonerProfile(profile: Profile) {
   const summonerIcon = React.useMemo(
-    () => getSummonerProfileIconUrl(summoner.profileIconId),
-    [summoner.profileIconId]
+    () => getSummonerProfileIconUrl(profile.profileIconId),
+    [profile]
   );
 
   return (
     <Link
-      href={`/profile/euw1/${account.gameName}-${account.tagLine}`}
+      href={`/profile/euw1/${profile.gameName}-${profile.tagLine}`}
       className="flex items-center gap-x-3 hover:bg-muted p-1 rounded-md transition-colors"
     >
       <Image
         src={summonerIcon}
-        alt={`${account.gameName}'s lol profile icon`}
+        alt={`${profile.gameName}'s lol profile icon`}
         className="rounded-full border"
         width={30}
         height={30}
       />
       <span className="text-muted-foreground text-sm">&#x2022;</span>
-      <span className="text-sm">{account.gameName}</span>
+      <span className="text-sm">{profile.gameName}</span>
       <span className="text-muted-foreground text-sm">&#x2022;</span>
       <span className="text-sm text-muted-foreground">
-        {summoner.summonerLevel}lvl
+        {profile.summonerLevel}lvl
       </span>
     </Link>
   );
