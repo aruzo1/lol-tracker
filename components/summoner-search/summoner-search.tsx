@@ -3,12 +3,14 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
 
 function getHashCount(value: string) {
   return (value.match(/#/g) || []).length;
 }
 
 export function SummonerSearch() {
+  const [showResults, setShowResults] = React.useState(true);
   const [search, setSearch] = React.useState("");
   const includesHash = React.useMemo(() => search.includes("#"), [search]);
   const showHint = React.useMemo(
@@ -17,12 +19,19 @@ export function SummonerSearch() {
   );
 
   const addHash = React.useCallback((value: string) => {
+    console.log(value.trim());
     setSearch(value.trim().replace("#", "") + " #");
   }, []);
 
   const onSearchChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
+
+      if (value.length > 0) {
+        setShowResults(true);
+      } else {
+        setShowResults(false);
+      }
 
       // If there are more than one `#`, don't do anything further
       if (getHashCount(value) > 1) {
@@ -31,12 +40,12 @@ export function SummonerSearch() {
 
       // If there isn't a `#` and the user adds one, append it with a space
       if (!includesHash && value.includes("#")) {
-        addHash(value);
+        addHash(search);
       } else {
         setSearch(value);
       }
     },
-    [addHash, includesHash]
+    [addHash, search, includesHash]
   );
 
   const onSearchKeyDown = React.useCallback(
@@ -49,26 +58,43 @@ export function SummonerSearch() {
   );
 
   return (
-    <Input asChild>
-      <label htmlFor="summoner-search" className="mt-6 h-12 relative flex items-center">
-        <MagnifyingGlassIcon className="size-6" />
-        <input
-          id="summoner-search"
-          name="summoner-search"
-          className="w-full outline-none ml-2"
-          placeholder="Game name + #tagline"
-          value={search}
-          onChange={onSearchChange}
-          onKeyDown={onSearchKeyDown}
-          autoComplete="off"
-        />
-        <div className="absolute flex items-center h-full top-0 ml-8 -z-10">
-          <span className="invisible whitespace-pre">{search} </span>
-          <span className="text-muted-foreground select-none">
-            {showHint && "#"}
-          </span>
-        </div>
-      </label>
-    </Input>
+    <div className="mt-6 w-lg">
+      <Popover open={showResults} onOpenChange={setShowResults}>
+        <PopoverAnchor asChild>
+          <Input asChild>
+            <label
+              htmlFor="summoner-search"
+              className="h-12 relative flex items-center overflow-hidden"
+            >
+              <MagnifyingGlassIcon className="size-6 text-muted-foreground" />
+              <input
+                id="summoner-search"
+                name="summoner-search"
+                className="w-full outline-none ml-2"
+                placeholder="Game name + #tagline"
+                value={search}
+                onChange={onSearchChange}
+                onKeyDown={onSearchKeyDown}
+                autoComplete="off"
+              />
+              <div className="absolute flex items-center h-full top-0 ml-8 -z-10">
+                <span className="invisible whitespace-pre">{search} </span>
+                <span className="text-muted-foreground select-none">
+                  {showHint && "#tagline"}
+                </span>
+              </div>
+            </label>
+          </Input>
+        </PopoverAnchor>
+
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] h-16"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          sideOffset={8}
+        >
+          xxx
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
