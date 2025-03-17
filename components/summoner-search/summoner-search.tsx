@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 function getHashCount(value: string) {
   return (value.match(/#/g) || []).length;
@@ -49,18 +50,19 @@ export function SummonerSearch() {
 
   return (
     <Input asChild>
-      <label htmlFor="summoner-search" className="mt-6 h-12 relative">
+      <label htmlFor="summoner-search" className="mt-6 h-12 relative flex items-center">
+        <MagnifyingGlassIcon className="size-6" />
         <input
           id="summoner-search"
           name="summoner-search"
-          className="w-full outline-none"
+          className="w-full outline-none ml-2"
           placeholder="Game name + #tagline"
           value={search}
           onChange={onSearchChange}
           onKeyDown={onSearchKeyDown}
           autoComplete="off"
         />
-        <div className="absolute flex items-center h-full top-0 -z-10">
+        <div className="absolute flex items-center h-full top-0 ml-8 -z-10">
           <span className="invisible whitespace-pre">{search} </span>
           <span className="text-muted-foreground select-none">
             {showHint && "#"}
