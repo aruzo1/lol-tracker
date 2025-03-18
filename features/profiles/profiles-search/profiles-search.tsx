@@ -9,12 +9,12 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { getProfileSuggestions } from "@/features/profiles/server-actions";
-import { SummonerProfile } from "./summoner-profile";
+import { Profile } from "./profile";
 
-export function SummonerSearch() {
+export function ProfilesSearch() {
   const [search, setSearch] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
   const [suggestions, getSuggestions] = React.useActionState(
     getProfileSuggestions,
     null
@@ -37,15 +37,15 @@ export function SummonerSearch() {
 
   return (
     <div className="relative mt-6 w-lg">
-      <Popover open={isSearchFocused}>
+      <Popover open={isFocused}>
         <PopoverAnchor>
           <Input
             className="h-12 pl-12"
             placeholder="Search for a summoner"
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             autoComplete="off"
           />
           <MagnifyingGlassIcon className="absolute top-3 left-3 size-6 text-muted-foreground" />
@@ -67,7 +67,7 @@ export function SummonerSearch() {
           {!isLoading &&
             suggestions &&
             suggestions.map((profileSuggestion) => (
-              <SummonerProfile
+              <Profile
                 key={profileSuggestion.account.puuid}
                 {...profileSuggestion}
               />

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getSummonerProfileIconUrl } from "@/features/summoners/urls";
 import { ProfileSuggestion } from "@/features/profiles/types";
 
-export function SummonerProfile({ account, summoner }: ProfileSuggestion) {
+export function Profile({ account, summoner }: ProfileSuggestion) {
   const summonerIcon = React.useMemo(
     () => getSummonerProfileIconUrl(summoner.profileIconId),
     [summoner]
