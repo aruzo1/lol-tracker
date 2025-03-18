@@ -2,18 +2,26 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Popover, PopoverContent, PopoverAnchor } from "../ui/popover";
 import { SummonerProfile } from "./summoner-profile";
 import { ProfileSuggestion } from "@/features/profiles/types";
-import { getProfilesSuggestions } from "@/features/profiles/utils";
+import { getProfileSuggestions } from "@/features/profiles/server-actions";
 
 function getHashCount(value: string) {
   return (value.match(/#/g) || []).length;
 }
 
+enum SearchStatus {
+  Empty,
+  Searching,
+  NotFound,
+  Found,
+}
+
 export function SummonerSearch() {
-  const [showResults, setShowResults] = React.useState(true);
+  const [showPopover, setShowPopover] = React.useState(false);
+  const [searchStatus, setSearchStatus] = React.useState(SearchStatus.Empty);
   const [search, setSearch] = React.useState("");
   const [suggestions, setSuggestions] = React.useState<ProfileSuggestion[]>([]);
 
@@ -31,10 +39,8 @@ export function SummonerSearch() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
 
-      if (value.length > 0) {
-        setShowResults(true);
-      } else {
-        setShowResults(false);
+      if (value.length === 0) {
+        setSearchStatus(SearchStatus.Empty);
       }
 
       // If there are more than one `#`, don't do anything further
@@ -52,6 +58,11 @@ export function SummonerSearch() {
     [addHash, search, includesHash]
   );
 
+  React.useEffect(
+    () => setShowPopover(searchStatus !== SearchStatus.Empty),
+    [searchStatus]
+  );
+
   const handleSearchKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "ArrowRight" && getHashCount(search) === 0) {
@@ -61,22 +72,34 @@ export function SummonerSearch() {
     [search, addHash]
   );
 
+  const handleFocus = React.useCallback(() => {
+    setShowPopover(searchStatus !== SearchStatus.Empty);
+  }, [searchStatus]);
+
   React.useEffect(() => {
     if (search.trim() === "") {
       return;
     }
-    console.log(search);
-    const timeOutId = setTimeout(
-      () => getProfilesSuggestions(search).then(setSuggestions),
-      500
-    );
+
+    setSearchStatus(SearchStatus.Searching);
+
+    const timeOutId = setTimeout(async () => {
+      const suggestions = await getProfileSuggestions(search);
+
+      if ("error" in suggestions) {
+        return setSearchStatus(SearchStatus.NotFound);
+      }
+
+      setSuggestions(suggestions);
+      setSearchStatus(SearchStatus.Found);
+    }, 300);
 
     return () => clearTimeout(timeOutId);
   }, [search]);
 
   return (
     <div className="mt-6 w-lg">
-      <Popover open={showResults} onOpenChange={setShowResults}>
+      <Popover open={showPopover}>
         <PopoverAnchor asChild>
           <Input asChild>
             <label
@@ -92,12 +115,13 @@ export function SummonerSearch() {
                 value={search}
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
+                onFocus={handleFocus}
                 autoComplete="off"
               />
               <div className="absolute flex items-center h-full top-0 ml-8 -z-10">
                 <span className="invisible whitespace-pre">{search} </span>
                 <span className="text-muted-foreground select-none">
-                  {showHint && "#tagline"}
+                  {showHint && "#"}
                 </span>
               </div>
             </label>
@@ -109,12 +133,21 @@ export function SummonerSearch() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           sideOffset={8}
         >
-          {suggestions.map((profileSuggestion) => (
-            <SummonerProfile
-              key={profileSuggestion.account.puuid}
-              {...profileSuggestion}
-            />
-          ))}
+          {searchStatus === SearchStatus.Searching && (
+            <ArrowPathIcon className="size-6 animate-spin mx-auto" />
+          )}
+          {searchStatus === SearchStatus.NotFound && (
+            <span className="text-muted-foreground text-sm mx-auto">
+              No profiles found
+            </span>
+          )}
+          {searchStatus === SearchStatus.Found &&
+            suggestions.map((profileSuggestion) => (
+              <SummonerProfile
+                key={profileSuggestion.account.puuid}
+                {...profileSuggestion}
+              />
+            ))}
         </PopoverContent>
       </Popover>
     </div>
