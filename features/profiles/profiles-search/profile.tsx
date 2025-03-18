@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getSummonerProfileIconUrl } from "@/features/summoners/urls";
+import { getSummonerProfileIconUrl } from "@/features/summoners/utils";
 import { ProfileSuggestion } from "@/features/profiles/types";
 
 export function Profile({ account, summoner }: ProfileSuggestion) {
