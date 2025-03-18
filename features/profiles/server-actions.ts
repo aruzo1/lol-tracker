@@ -2,28 +2,32 @@
 
 import { getAccountByGameNameAndTagLine } from "@/features/accounts/server-actions";
 import { getSummonerByPuuid } from "@/features/summoners/server-actions";
+import { ProfileSuggestion } from "./types";
 
-export async function getProfileSuggestions(name: string) {
+export async function getProfileSuggestions(
+  prevState: ProfileSuggestion[] | null,
+  name: string
+) {
   if (!name) {
-    return { error: "No name provided" };
+    return null;
   }
 
   const [gameName, tagLine] = name.split("#");
 
   if (!gameName || !tagLine) {
-    return { error: "Invalid name format" };
+    return null;
   }
 
   const account = await getAccountByGameNameAndTagLine(gameName, tagLine);
 
   if (!account) {
-    return { error: "Account not found" };
+    return null;
   }
 
   const summoner = await getSummonerByPuuid(account.puuid);
 
   if (!summoner) {
-    return { error: "Summoner not found" };
+    return null;
   }
 
   return [{ account, summoner }];
